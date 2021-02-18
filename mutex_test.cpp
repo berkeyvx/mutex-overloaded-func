@@ -8,13 +8,12 @@
     e.g Camera publish images constantly, cloning image is expensive(pass by reference required)
         mutex_test::foo() and mutex_test::foo(int) needs lock because both function does operations on resource(mutex)
 */
-
+std::mutex g_mutex;
 
 class mutex_test
 {
 private:
     std::string _className;
-    std::mutex _mutex;
 
     // overloaded functions for test
     void foo();
@@ -41,15 +40,17 @@ mutex_test::~mutex_test()
 
 void mutex_test::foo()
 {
+    std::cout << "Begin : " << _className << "\n";
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    std::cout << _className << "\n";
+    std::cout << "End of: " <<_className << "\n";
 }
 
 
 void mutex_test::foo(int)
 {
+    std::cout << "Begin : " << _className << "\n";
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    std::cout << _className << "\n";
+    std::cout << "End of: " <<_className << "\n";
 }
 
 
@@ -57,7 +58,7 @@ void mutex_test::whileFoo()
 {
     while(true)
     {
-        std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+        std::unique_lock<std::mutex> lock(g_mutex, std::try_to_lock);
         if(lock){
             foo();
         }
@@ -69,7 +70,7 @@ void mutex_test::whileFoo(int)
 {
     while(true)
     {
-        std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+        std::unique_lock<std::mutex> lock(g_mutex, std::try_to_lock);
         if(lock){
             foo(1);
         }
@@ -79,7 +80,6 @@ void mutex_test::whileFoo(int)
 
 int main(int argc, char const *argv[])
 {
-    auto _startTime = std::chrono::system_clock::now();
     mutex_test a("class a");
     mutex_test b("class b");
 
@@ -95,4 +95,3 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
-
